@@ -9,6 +9,7 @@ export default function Recorder() {
   const chunksRef = useRef<Blob[]>([]);
 
   const startRecording = async () => {
+    // 获取麦克风权限并开始录音
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
     });
@@ -23,16 +24,32 @@ export default function Recorder() {
       chunksRef.current.push(event.data);
     };
 
-    mediaRecorder.onstop = () => {
+    // 录音结束调用后端接口上传音频
+    mediaRecorder.onstop = async () => {
       const audioBlob = new Blob(chunksRef.current, {
         type: "audio/webm",
       });
 
+      // 本地播放
       const audioUrl = URL.createObjectURL(audioBlob);
 
       const audio = new Audio(audioUrl);
 
       audio.play();
+
+      // 上传到 FastAPI 后端
+      const formData = new FormData();
+
+      formData.append("file", audioBlob, "recording.webm");
+
+      const response = await fetch("http://127.0.0.1:8000/upload-audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      console.log("上传结果:", data);
     };
 
     mediaRecorder.start();
