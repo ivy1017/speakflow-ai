@@ -1,5 +1,7 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.routes.audio import router as audio_router
 
 app = FastAPI()
 
@@ -16,16 +18,4 @@ app.add_middleware(
 async def root():
     return {"message": "SpeakFlow AI Backend"}
 
-
-@app.post("/upload-audio")
-async def upload_audio(file: UploadFile = File(...)):
-    print("收到文件:", file.filename)
-
-    content = await file.read()
-
-    print("文件大小:", len(content))
-
-    return {
-        "filename": file.filename,
-        "size": len(content),
-    }
+app.include_router(audio_router)
