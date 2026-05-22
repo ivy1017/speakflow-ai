@@ -1,18 +1,33 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import APIRouter, UploadFile, File
+import tempfile
+import os
 
-app = FastAPI()
+from app.services.whisper_service import transcribe_audio
+from app.services.chat_service import generate_reply
+
+router = APIRouter()
 
 
-
-@app.post("/upload-audio")
+@router.post("/upload-audio")
 async def upload_audio(file: UploadFile = File(...)):
-    print("收到文件:", file.filename)
+    # 保存临时文件
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".webm"
+    ) as tmp:
+        tmp.write(await file.read())
+        tmp_path = tmp.name
 
-    content = await file.read()
+    # Whisper 识别
+    text = transcribe_audio(tmp_path)
 
-    print("文件大小:", len(content))
+    # 删除临时文件
+    os.unlink(tmp_path)
+
+    # AI 回复
+    reply = generate_reply(text)
 
     return {
-        "filename": file.filename,
-        "size": len(content),
+        "text": text,
+        "reply": reply
     }
