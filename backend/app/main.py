@@ -8,7 +8,7 @@ app = FastAPI()
 # 添加跨域中间件，允许来自前端 http://localhost:3000 的请求
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
