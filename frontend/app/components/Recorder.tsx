@@ -50,6 +50,13 @@ export default function Recorder() {
       const data = await response.json();
 
       console.log("上传结果:", data);
+      alert(`
+        你说的是：
+        ${data.text}
+
+        AI 回复：
+        ${data.reply}
+        `);
     };
 
     mediaRecorder.start();
